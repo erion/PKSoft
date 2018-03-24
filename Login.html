@@ -1,0 +1,37 @@
+<!DOCTYPE=html>
+<html lang="pt_BR">
+	<head>
+		<title>Login</title>
+		<meta charset="UTF-8">
+		<meta name="description" content="Login PKSoft">
+		<meta name="keywords" content="Farmacocinetica, Farmacia, Paciente, Concentracaos">
+		<meta name="author" content="Vitor Ebertz">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" type="text/css" href="Index.css">
+	</head>
+
+	<body class="body">
+		<div  class="header">
+			<img src="img/logo.jpg" alt="Logo PKSoft" class="logo"/>
+			<h1 class="title">PKSOFT</h1>
+			<p class="subtitle">Software para controle de regimes de dosagens</p>			
+		</div>
+
+		<div class="logonform">
+
+			<h2>Login</h2>
+
+			<form action="../Back-end/ctrl/validaLogin.php" method="post">
+				<br>
+				Usuario: <input type="text" name="username" id="username"/>
+				<br><br> 
+				Senha: <input type="text" name="password" id="password"/>
+				<br><br>
+				<button onclick="validarLogon()">Confirmar</button>
+			</form>
+
+			<a href="CadastroUsuario.html">Cadastrar usuario</a>
+
+		</div>
+	</body>
+</html>
