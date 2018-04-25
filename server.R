@@ -4,7 +4,6 @@
 #library(jsonlite)
 #library(df2json)
 #library(RMySQL)
-#setwd("C:/Temp/drive-download-20180419T204420Z-001")
 #r <- plumb("server.R")
 #r$run(port=8000)
 
@@ -34,9 +33,13 @@ cors <- function(res) {
 }
 
 #* @post /testePost
-testePost <- function(a){
-  df <- json2df(a)
+testePost <- function(teste){
+  fileConn<-file("output.txt")
+  writeLines(teste, fileConn)
+  close(fileConn)
+  return("Ma oe")
 }
+
 
 #* @get /tabela_pacientes
 get_tabela_pacientes <- function(){
