@@ -8,6 +8,24 @@
 #r <- plumb("server.R")
 #r$run(port=8000)
 
+#GET:
+#tabela pacientes, tabela tratamentos (por paciente), tabela histórico (por tratamento), tabela fármacos
+#cada função do get tem uma função de acesso ao banco relacionada
+#pesquisa_pacientes, pesquisa_tratamentos, pesquisa_historico
+#dados_paciente para retornar as infos daquele paciente
+#avançado: simulação
+
+#POST:
+#novo paciente
+#update paciente
+#remover paciente
+#novo tratamento
+#update tratamento
+#remover tratamento
+#novo dado histórico
+#remover dado histórico
+
+#agora no início eu insiro todas as funções do GET
 
 #* @filter cors
 cors <- function(res) {
@@ -39,10 +57,26 @@ get_pesquisa_tratamentos <- function(cod_paciente){
   return(jsondf)
 }
 
+#* @get /pesquisa_tratamentos_paciente
+#* @cod_paciente
+get_pesquisa_tratamentos <- function(cod_paciente){
+  jsondf <- df2json(dados_paciente(cod_paciente))
+  return(jsondf)
+}
+
+#* @get /dados_historico
+#* @cod_paciente
+get_dados_historico <- function(cod_tratamento){
+  jsondf <- df2json(dados_historico(cod_tratamento))
+  return(jsondf)
+}
+
 abre_conexao <- function(){
   conexao <- dbConnect(MySQL(),user="0130841",password="zforzachariah",dbname="farmacocinetica", host="ceted.feevale.br", port=3306)
   return(conexao)
 }
+
+#todas as funções com acesso a banco de dados para retorno do GET
 
 tabela_pacientes <- function(){
   abriu_conexao <- abre_conexao()
@@ -75,5 +109,23 @@ pesquisa_tratamentos <- function(cod_paciente){
   return(df_tratamento)
 }
 
+dados_paciente <- function(cod_paciente){
+  abriu_conexao <- abre_conexao()
+  query <- paste("select nome_paciente, cpf_paciente, nascimento_paciente, peso_paciente, altura_paciente, cr_paciente, unid_int_paciente, observacao_paciente, rg_paciente, telefone_paciente, genero_paciente, agente_saude from paciente where cod_paciente = ",cod_paciente)
+  rs <- dbSendQuery(abriu_conexao,query)
+  data <- fetch(rs, n=1)
+  df <- data.frame(data)
+  dbDisconnect(abriu_conexao)
+  
+  return(df)
+}
 
-
+dados_historico <- function(cod_tratamento){
+  query <- paste("select h.cod_historico,h.atributo_historico, h.valor_historico, h.data_hora_historico,h.cod_tratamento FROM historico h WHERE cod_tratamento = ",cod_tratamento)
+  abriu_conexao <- abre_conexao()
+  rs = dbSendQuery(abriu_conexao,query)
+  data = fetch(rs,n=50)
+  df <- data.frame(data)
+  
+  return(df)
+}
