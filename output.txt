@@ -1,5 +1,1 @@
-Instrucoes
-
-1. Baixar CURL: https://winampplugins.co.uk/curl/
-2. Rodar o server
-3. curl --data "variavel=valor" "localhost:8000/metodo"
+vitor

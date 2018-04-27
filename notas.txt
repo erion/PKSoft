@@ -1,0 +1,34 @@
+#setwd("d:/vitor/projetos/pksoft/api")
+#library(plumber)
+#library(jsonlite)
+#library(df2json)
+#library(RMySQL)
+#r <- plumb("server.R")
+#r$run(port=8000)
+
+
+#GET:
+#tabela pacientes, tabela tratamentos (por paciente), tabela histórico (por tratamento), tabela fármacos
+#cada função do get tem uma função de acesso ao banco relacionada
+#pesquisa_pacientes, pesquisa_tratamentos, pesquisa_historico
+#dados_paciente para retornar as infos daquele paciente
+#avançado: simulação
+
+#POST:
+#novo paciente
+#update paciente
+#remover paciente
+#novo tratamento
+#update tratamento
+#remover tratamento
+#novo dado histórico
+#remover dado histórico
+
+#culr --data "nome_paciente=&cpf_paciente=&nascimento_paciente=&genero_paciente=&peso_paciente=&altura_paciente=&cr_paciente=&unid_int_paciente=&observacao_paciente=&rg_paciente=&
+#telefone_paciente=&agente_saude=" "localhost:8000/"
+
+#fileConn<-file("output.txt")
+#writeLines(nome_paciente, fileConn)
+#close(fileConn)
+
+#write(query_farm,file="~/PKSoft/wifs.txt")
