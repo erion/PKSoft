@@ -6,6 +6,16 @@ cors <- function(res) {
   plumber::forward()
 }
 
+#* @post /login
+login <- function(usuario){
+  print(usuario)
+  login <- json2df(usuario)
+  if(login[1] == 'admin' & login[2] == 'admin')
+    return(TRUE)
+  else
+    return(FALSE)
+}
+
 #* @post /novoPaciente
 novoPaciente <- function(paciente){
   df_paciente <- json2df(paciente)
@@ -35,32 +45,34 @@ novoEvento <- function(evento){
   disconnect(conexao)
 }
 
+#* @post /farmaco
+farmaco <- function(farmaco){
+  conexao <- abre_conexao()
+  query <- paste("INSERT INTO farmaco(cod_farmaco, nome_farmaco) VALUES('", farmaco$cod_farmaco,"',",farmaco$nome_farmaco,")")
+  dbSendQuery(conexao,query)
+  disconnect(conexao)
+}
+
+#* @json
 #* @get /tabela_pacientes
 get_tabela_pacientes <- function(){
-  jsondf <- df2json(tabela_pacientes())
-  return(jsondf)
+  return(tabela_pacientes())
 }
 
+#* @json
 #* @get /tabela_tratamentos
 get_tabela_tratamentos <- function(){
-  jsondf <- df2json(tabela_tratamentos())
-  return(jsondf)
+  return(tabela_tratamentos())
 }
 
+#* @json
 #* @get /pesquisa_tratamentos
 #* @cod_paciente
 get_pesquisa_tratamentos <- function(cod_paciente){
-  jsondf <- df2json(pesquisa_tratamentos(cod_paciente))
-  return(jsondf)
+  return(pesquisa_tratamentos(cod_paciente))
 }
 
-#* @get /pesquisa_tratamentos_paciente
-#* @cod_paciente
-get_pesquisa_tratamentos <- function(cod_paciente){
-  jsondf <- df2json(dados_paciente(cod_paciente))
-  return(jsondf)
-}
-
+#* @json
 #* @get /dados_historico
 #* @cod_paciente
 get_dados_historico <- function(cod_tratamento){
@@ -68,9 +80,10 @@ get_dados_historico <- function(cod_tratamento){
   return(jsondf)
 }
 
+#* @json
 #* @get /get_farmacos
 get_farmacos <- function(){
-  return(df2json(tabela_farmacos()))
+  return(tabela_farmacos())
 }
 
 abre_conexao <- function(){
@@ -78,22 +91,23 @@ abre_conexao <- function(){
   return(conexao)
 }
 
-#todas as funções com acesso a banco de dados para retorno do GET
+#todas as funÃ§Ãµes com acesso a banco de dados para retorno do GET
 
 tabela_farmacos <- function(){
-  query_farmaco <- paste("SELECT cod_farmaco, nome_farmaco FROM farmaco")
+  conexao <- abre_conexao()
+  query_farmaco <- paste("SELECT * FROM farmaco")
   rsFarmaco <- dbSendQuery(conexao,query_farmaco)
   data_farmaco <- fetch(rsFarmaco, n=10)
   df_farmaco <- data.frame(data_farmaco)
+  dbDisconnect(conexao)
   return(df_farmaco)
 }
 
 tabela_pacientes <- function(){
   abriu_conexao <- abre_conexao()
-  rs_paciente = dbSendQuery(abriu_conexao,"SELECT p.cod_paciente, p.nome_paciente, p.cpf_paciente, p.nascimento_paciente, p.unid_int_paciente FROM paciente p")
+  rs_paciente = dbSendQuery(abriu_conexao,"SELECT * FROM paciente")
   data_paciente = fetch(rs_paciente,n = 50)
   df_paciente <- data.frame(data_paciente)
-  #colnames(df_paciente) <- c("Cod. Paciente", "Nome", "CPF", "Data de Nascimento", "Unidade de Internação")
   dbDisconnect(abriu_conexao)
   return(df_paciente)
 }
@@ -103,31 +117,18 @@ tabela_tratamentos <- function(){
   rs_tratamento = dbSendQuery(abriu_conexao,"SELECT p.nome_paciente, f.nome_farmaco, t.cod_tratamento FROM paciente p INNER JOIN tratamento t ON t.cod_paciente = p.cod_paciente INNER JOIN farmaco f ON f.cod_farmaco = t.cod_farmaco")
   data_tratamento = fetch(rs_tratamento,n=50)
   df_tratamento = data.frame(data_tratamento)
-  colnames(df_tratamento) <- c("Paciente", "FÃ¡rmaco", "Cod. Tratamento")
   dbDisconnect(abriu_conexao)
   return(df_tratamento)
 }
 
 pesquisa_tratamentos <- function(cod_paciente){
   abriu_conexao <- abre_conexao()
-  query = paste("SELECT p.nome_paciente, f.nome_farmaco, t.cod_tratamento FROM paciente p INNER JOIN tratamento t ON t.cod_paciente = p.cod_paciente INNER JOIN farmaco f ON f.cod_farmaco = t.cod_farmaco WHERE p.cod_paciente = ",cod_paciente)
+  query = paste("SELECT p.nome_paciente, f.nome_farmaco, t.cod_tratamento, t.cod_farmaco FROM paciente p INNER JOIN tratamento t ON t.cod_paciente = p.cod_paciente INNER JOIN farmaco f ON f.cod_farmaco = t.cod_farmaco WHERE p.cod_paciente = ",cod_paciente)
   rs_tratamento = dbSendQuery(abriu_conexao,query)
   data_tratamento = fetch(rs_tratamento,n=50)
   df_tratamento = data.frame(data_tratamento)
-  colnames(df_tratamento) <- c("Paciente", "Fármaco", "Cod. Tratamento")
   dbDisconnect(abriu_conexao)
   return(df_tratamento)
-}
-
-dados_paciente <- function(cod_paciente){
-  abriu_conexao <- abre_conexao()
-  query <- paste("select nome_paciente, cpf_paciente, nascimento_paciente, peso_paciente, altura_paciente, cr_paciente, unid_int_paciente, observacao_paciente, rg_paciente, telefone_paciente, genero_paciente, agente_saude from paciente where cod_paciente = ",cod_paciente)
-  rs <- dbSendQuery(abriu_conexao,query)
-  data <- fetch(rs, n=1)
-  df <- data.frame(data)
-  dbDisconnect(abriu_conexao)
-  
-  return(df)
 }
 
 dados_historico <- function(cod_tratamento){
@@ -136,6 +137,6 @@ dados_historico <- function(cod_tratamento){
   rs = dbSendQuery(abriu_conexao,query)
   data = fetch(rs,n=50)
   df <- data.frame(data)
-  
+
   return(df)
 }
