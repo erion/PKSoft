@@ -16,14 +16,43 @@ login <- function(usuario){
     return(FALSE)
 }
 
-#* @post /novoPaciente
-novoPaciente <- function(paciente){
-  df_paciente <- json2df(paciente)
+#* @post /novo_paciente
+novo_paciente <- function(paciente){
   conexao <- abre_conexao()
-  query <- paste("INSERT INTO paciente(nome_paciente,cpf_paciente,nascimento_paciente,genero_paciente,peso_paciente,altura_paciente,cr_paciente,unid_int_paciente,observacao_paciente,rg_paciente,telefone_paciente,agente_saude) VALUES('",df_paciente[1],"',",df_paciente[2],",'",df_paciente[3],"',",df_paciente[4],",",df_paciente[5],",",df_paciente[6],",",df_paciente[7],",'",df_paciente[8],"','",df_paciente[9],"',",df_paciente[10],",",df_paciente[11],",'",df_paciente[12],"')")
+  query <- paste("INSERT INTO paciente(nome_paciente,cpf_paciente,nascimento_paciente,genero_paciente,",
+                 "peso_paciente,altura_paciente,cr_paciente,unid_int_paciente,observacao_paciente,",
+                 "rg_paciente,telefone_paciente,agente_saude) VALUES('",
+                 paciente$nome_paciente,"',",paciente$cpf_paciente,",'",paciente$nascimento_paciente,
+                 "',",paciente$genero_paciente,",",paciente$peso_paciente,",",paciente$altura_paciente,
+                 ",",paciente$cr_paciente,",'",paciente$unid_int_paciente,"','",paciente$observacao_paciente,
+                 "',",paciente$rg_paciente,",",paciente$telefone_paciente,",'",paciente$agente_saude,"')")
+
   dbSendQuery(conexao,query)
   dbDisconnect(conexao)
   return("Paciente inserido com sucesso!")
+}
+
+#* @post /alterar_paciente/<id>
+alterar_paciente <- function(id, paciente){
+  conexao <- abre_conexao()
+  query <- paste("UPDATE paciente SET ",
+                 "nome_paciente='",paciente$nome_paciente,"',",
+                 "cpf_paciente='",paciente$cpf_paciente,"',",
+                 "nascimento_paciente='",paciente$nascimento_paciente,"',",
+                 "genero_paciente='",paciente$genero_paciente,"',",
+                 "peso_paciente=",paciente$peso_paciente,",",
+                 "altura_paciente=",paciente$altura_paciente,",",
+                 "cr_paciente=",paciente$cr_paciente,",",
+                 "unid_int_paciente=",paciente$unid_int_paciente,",",
+                 "observacao_paciente='",paciente$observacao_paciente,"',",
+                 "rg_paciente='",paciente$rg_paciente,"',",
+                 "telefone_paciente='",paciente$telefone_paciente,"',",
+                 "agente_saude= '",paciente$agente_saude,"'",
+                 "WHERE cod_paciente=",id)
+
+  dbSendQuery(conexao,query)
+  dbDisconnect(conexao)
+  return("Paciente alterado com sucesso!")
 }
 
 #* @post /novoTratamento
