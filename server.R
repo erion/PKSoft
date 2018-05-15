@@ -20,12 +20,12 @@ login <- function(usuario){
 novo_paciente <- function(paciente){
   conexao <- abre_conexao()
   query <- paste("INSERT INTO paciente(nome_paciente,cpf_paciente,nascimento_paciente,genero_paciente,",
-                 "peso_paciente,altura_paciente,cr_paciente,unid_int_paciente,observacao_paciente,",
-                 "rg_paciente,telefone_paciente,agente_saude) VALUES('",
-                 paciente$nome_paciente,"',",paciente$cpf_paciente,",'",paciente$nascimento_paciente,
-                 "',",paciente$genero_paciente,",",paciente$peso_paciente,",",paciente$altura_paciente,
-                 ",",paciente$cr_paciente,",'",paciente$unid_int_paciente,"','",paciente$observacao_paciente,
-                 "',",paciente$rg_paciente,",",paciente$telefone_paciente,",'",paciente$agente_saude,"')")
+    "peso_paciente,altura_paciente,cr_paciente,unid_int_paciente,observacao_paciente,",
+    "rg_paciente,telefone_paciente,agente_saude) VALUES('",
+    paciente$nome_paciente,"',",paciente$cpf_paciente,",'",paciente$nascimento_paciente,
+    "',",paciente$genero_paciente,",",paciente$peso_paciente,",",paciente$altura_paciente,
+    ",",paciente$cr_paciente,",'",paciente$unid_int_paciente,"','",paciente$observacao_paciente,
+    "',",paciente$rg_paciente,",",paciente$telefone_paciente,",'",paciente$agente_saude,"')")
 
   dbSendQuery(conexao,query)
   dbDisconnect(conexao)
@@ -36,33 +36,44 @@ novo_paciente <- function(paciente){
 alterar_paciente <- function(id, paciente){
   conexao <- abre_conexao()
   query <- paste("UPDATE paciente SET ",
-                 "nome_paciente='",paciente$nome_paciente,"',",
-                 "cpf_paciente='",paciente$cpf_paciente,"',",
-                 "nascimento_paciente='",paciente$nascimento_paciente,"',",
-                 "genero_paciente='",paciente$genero_paciente,"',",
-                 "peso_paciente=",paciente$peso_paciente,",",
-                 "altura_paciente=",paciente$altura_paciente,",",
-                 "cr_paciente=",paciente$cr_paciente,",",
-                 "unid_int_paciente=",paciente$unid_int_paciente,",",
-                 "observacao_paciente='",paciente$observacao_paciente,"',",
-                 "rg_paciente='",paciente$rg_paciente,"',",
-                 "telefone_paciente='",paciente$telefone_paciente,"',",
-                 "agente_saude= '",paciente$agente_saude,"'",
-                 "WHERE cod_paciente=",id)
+    "nome_paciente='",paciente$nome_paciente,"',",
+    "cpf_paciente='",paciente$cpf_paciente,"',",
+    "nascimento_paciente='",paciente$nascimento_paciente,"',",
+    "genero_paciente='",paciente$genero_paciente,"',",
+    "peso_paciente=",paciente$peso_paciente,",",
+    "altura_paciente=",paciente$altura_paciente,",",
+    "cr_paciente=",paciente$cr_paciente,",",
+    "unid_int_paciente=",paciente$unid_int_paciente,",",
+    "observacao_paciente='",paciente$observacao_paciente,"',",
+    "rg_paciente='",paciente$rg_paciente,"',",
+    "telefone_paciente='",paciente$telefone_paciente,"',",
+    "agente_saude= '",paciente$agente_saude,"'",
+    "WHERE cod_paciente=",id)
 
   dbSendQuery(conexao,query)
   dbDisconnect(conexao)
   return("Paciente alterado com sucesso!")
 }
 
-#* @post /novoTratamento
-novoTratamento <- function(tratamento){
-  df_tratamento <- json2df(tratamento)
+#* @post /novo_tratamento
+novo_tratamento <- function(tratamento){
   conexao <- abre_conexao()
-  query <- paste("INSERT INTO tratamento(cod_paciente, cod_farmaco) VALUES(",df_tratamento[1],",",df_tratamento[2],")")
+  query <- paste("INSERT INTO tratamento(cod_paciente, cod_farmaco) VALUES(",tratamento$cod_paciente,",",tratamento$cod_farmaco,")")
   dbSendQuery(conexao,query)
   dbDisconnect(conexao)
   return("Tratamento inserido com sucesso!")
+}
+
+#* @post /alterar_tratamento/<id>
+alterar_tratamento <- function(id, tratamento){
+  conexao <- abre_conexao()
+  query <- paste(paste("UPDATE tratamento SET ",
+    "cod_paciente=",tratamento$cod_paciente,",",
+    "cod_tratamento=",tratamento$cod_tratamento,
+    "WHERE cod_tratamento=",id))
+  dbSendQuery(conexao,query)
+  dbDisconnect(conexao)
+  return("Tratamento alterado com sucesso!")
 }
 
 #* @post /novoEvento
