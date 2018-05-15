@@ -67,10 +67,10 @@ novo_tratamento <- function(tratamento){
 #* @post /alterar_tratamento/<id>
 alterar_tratamento <- function(id, tratamento){
   conexao <- abre_conexao()
-  query <- paste(paste("UPDATE tratamento SET ",
+  query <- paste("UPDATE tratamento SET ",
     "cod_paciente=",tratamento$cod_paciente,",",
-    "cod_tratamento=",tratamento$cod_tratamento,
-    "WHERE cod_tratamento=",id))
+    "cod_farmaco=",tratamento$cod_farmaco,
+    "WHERE cod_tratamento=",id)
   dbSendQuery(conexao,query)
   dbDisconnect(conexao)
   return("Tratamento alterado com sucesso!")
@@ -185,7 +185,7 @@ tabela_tratamentos <- function(){
 
 pesquisa_tratamentos <- function(cod_paciente){
   abriu_conexao <- abre_conexao()
-  query = paste("SELECT p.nome_paciente, f.nome_farmaco, t.cod_tratamento, t.cod_farmaco FROM paciente p INNER JOIN tratamento t ON t.cod_paciente = p.cod_paciente INNER JOIN farmaco f ON f.cod_farmaco = t.cod_farmaco WHERE p.cod_paciente = ",cod_paciente)
+  query = paste("SELECT p.nome_paciente, f.nome_farmaco, t.cod_tratamento, t.cod_farmaco, t.cod_paciente FROM paciente p INNER JOIN tratamento t ON t.cod_paciente = p.cod_paciente INNER JOIN farmaco f ON f.cod_farmaco = t.cod_farmaco WHERE p.cod_paciente = ",cod_paciente)
   rs_tratamento = dbSendQuery(abriu_conexao,query)
   data_tratamento = fetch(rs_tratamento,n=50)
   df_tratamento = data.frame(data_tratamento)
