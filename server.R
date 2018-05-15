@@ -45,12 +45,34 @@ novoEvento <- function(evento){
   disconnect(conexao)
 }
 
-#* @post /farmaco
-farmaco <- function(farmaco){
+#* @preempt cors
+#* @post /novo_farmaco
+novo_farmaco <- function(farmaco, res){
   conexao <- abre_conexao()
-  query <- paste("INSERT INTO farmaco(cod_farmaco, nome_farmaco) VALUES('", farmaco$cod_farmaco,"',",farmaco$nome_farmaco,")")
+  query <- paste("INSERT INTO farmaco(nome_farmaco) VALUES('",farmaco$nome_farmaco,"')")
   dbSendQuery(conexao,query)
-  disconnect(conexao)
+
+  res$status = 200
+  res$body = 'Fármaco inserido com sucesso'
+
+  dbDisconnect(conexao)
+
+  return(res)
+}
+
+#* @preempt cors
+#* @put /alterar_farmaco/<id>
+alterar_farmaco <- function(id, farmaco, res){
+  conexao <- abre_conexao()
+  query <- paste("UPDATE farmaco SET nome_farmaco= '",farmaco$nome_farmaco,"' WHERE cod_farmaco= '",id,"'")
+  dbSendQuery(conexao,query)
+
+  res$status = 200
+  res$body = 'Fármaco alterado com sucesso'
+
+  dbDisconnect(conexao)
+
+  return(res)
 }
 
 #* @json
