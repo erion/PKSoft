@@ -76,11 +76,26 @@ alterar_tratamento <- function(id, tratamento){
   return("Tratamento alterado com sucesso!")
 }
 
-#* @post /novoEvento
-novoEvento <- function(evento){
+#* @post /novo_historico
+novo_historico <- function(historico){
+  conexao <- abre_conexao()
+  query <- paste("INSERT INTO historico(atributo_historico, valor_historico, data_hora_historico, cod_tratamento)",
+                 "VALUES('",historico$atributo_historico,"',",historico$valor_historico,
+                 ",'",historico$data_hora_historico,"',",historico$cod_tratamento,")")
+  dbSendQuery(conexao,query)
+  disconnect(conexao)
+}
+
+#* @post /alterar_historico/<id>
+alterar_historico <- function(id, historico){
   df_evento <- json2df(evento)
   conexao <- abre_conexao()
-  query <- paste("INSERT INTO historico(atributo_historico, valor_historico, data_hora_historico, cod_tratamento) VALUES('",df_evento[1],"',",df_evento[2],",'",df_evento[3],"',",df_evento[4],")")
+  query <- paste("UPDATE historico SET ",
+                "atributo_historico = '",historico$atributo_historico,"'",
+                ",valor_historico = ",historico$valor_historico,
+                ",data_hora_historico = '",historico$data_hora_historico,"'",
+                ",cod_tratamento = ",historico$cod_tratamento,
+                "WHERE cod_historico = ",id)
   dbSendQuery(conexao,query)
   disconnect(conexao)
 }
@@ -137,9 +152,8 @@ get_pesquisa_tratamentos <- function(cod_paciente){
 #* @json
 #* @get /dados_historico
 #* @cod_paciente
-get_dados_historico <- function(cod_tratamento){
-  jsondf <- df2json(dados_historico(cod_tratamento))
-  return(jsondf)
+get_dados_historico <- function(cod_paciente){
+  return(dados_historico(cod_paciente))
 }
 
 #* @json
@@ -193,8 +207,12 @@ pesquisa_tratamentos <- function(cod_paciente){
   return(df_tratamento)
 }
 
-dados_historico <- function(cod_tratamento){
-  query <- paste("select h.cod_historico,h.atributo_historico, h.valor_historico, h.data_hora_historico,h.cod_tratamento FROM historico h WHERE cod_tratamento = ",cod_tratamento)
+dados_historico <- function(cod_paciente){
+  query <- paste("select h.*, f.nome_farmaco FROM historico h, tratamento t, paciente p, farmaco f",
+    "WHERE h.cod_tratamento = t.cod_tratamento",
+    "AND t.cod_paciente = p.cod_paciente",
+    "AND t.cod_farmaco = f.cod_farmaco",
+    "AND p.cod_paciente = ", cod_paciente)
   abriu_conexao <- abre_conexao()
   rs = dbSendQuery(abriu_conexao,query)
   data = fetch(rs,n=50)
