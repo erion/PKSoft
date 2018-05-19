@@ -83,7 +83,7 @@ novo_historico <- function(historico){
                  "VALUES('",historico$atributo_historico,"',",historico$valor_historico,
                  ",'",historico$data_hora_historico,"',",historico$cod_tratamento,")")
   dbSendQuery(conexao,query)
-  disconnect(conexao)
+  dbDisconnect(conexao)
 }
 
 #* @post /alterar_historico/<id>
@@ -97,7 +97,7 @@ alterar_historico <- function(id, historico){
                 ",cod_tratamento = ",historico$cod_tratamento,
                 "WHERE cod_historico = ",id)
   dbSendQuery(conexao,query)
-  disconnect(conexao)
+  dbDisconnect(conexao)
 }
 
 #* @preempt cors
