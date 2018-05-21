@@ -23,9 +23,9 @@ novo_paciente <- function(paciente){
     "peso_paciente,altura_paciente,cr_paciente,unid_int_paciente,observacao_paciente,",
     "rg_paciente,telefone_paciente,agente_saude) VALUES('",
     paciente$nome_paciente,"',",paciente$cpf_paciente,",'",paciente$nascimento_paciente,
-    "',",paciente$genero_paciente,",",paciente$peso_paciente,",",paciente$altura_paciente,
+    "','",paciente$genero_paciente,"',",paciente$peso_paciente,",",paciente$altura_paciente,
     ",",paciente$cr_paciente,",'",paciente$unid_int_paciente,"','",paciente$observacao_paciente,
-    "',",paciente$rg_paciente,",",paciente$telefone_paciente,",'",paciente$agente_saude,"')")
+    "',",paciente$rg_paciente,",",paciente$telefone_paciente,",'",paciente$agente_saude,"')", sep="")
 
   dbSendQuery(conexao,query)
   dbDisconnect(conexao)
@@ -43,12 +43,12 @@ alterar_paciente <- function(id, paciente){
     "peso_paciente=",paciente$peso_paciente,",",
     "altura_paciente=",paciente$altura_paciente,",",
     "cr_paciente=",paciente$cr_paciente,",",
-    "unid_int_paciente=",paciente$unid_int_paciente,",",
+    "unid_int_paciente='",paciente$unid_int_paciente,"',",
     "observacao_paciente='",paciente$observacao_paciente,"',",
     "rg_paciente='",paciente$rg_paciente,"',",
     "telefone_paciente='",paciente$telefone_paciente,"',",
     "agente_saude= '",paciente$agente_saude,"'",
-    "WHERE cod_paciente=",id)
+    "WHERE cod_paciente=",id, sep="")
 
   dbSendQuery(conexao,query)
   dbDisconnect(conexao)
@@ -81,11 +81,12 @@ novo_historico <- function(historico){
   conexao <- abre_conexao()
   query <- paste("INSERT INTO historico(atributo_historico, valor_historico, data_hora_historico, cod_tratamento)",
                  "VALUES('",historico$atributo_historico,"',",historico$valor_historico,
-                 ",'",historico$data_hora_historico,"',",historico$cod_tratamento,")")
+                 ",'",historico$data_hora_historico,"',",historico$cod_tratamento,")", sep="")
   dbSendQuery(conexao,query)
   dbDisconnect(conexao)
 }
 
+# não está sendo utilizado, foi removido após implementação, como RN, não faz sentido editar o histórico
 #* @post /alterar_historico/<id>
 alterar_historico <- function(id, historico){
   df_evento <- json2df(evento)
@@ -95,7 +96,7 @@ alterar_historico <- function(id, historico){
                 ",valor_historico = ",historico$valor_historico,
                 ",data_hora_historico = '",historico$data_hora_historico,"'",
                 ",cod_tratamento = ",historico$cod_tratamento,
-                "WHERE cod_historico = ",id)
+                "WHERE cod_historico = ",id, sep="")
   dbSendQuery(conexao,query)
   dbDisconnect(conexao)
 }
@@ -158,7 +159,7 @@ get_farmacos <- function(){
 }
 
 abre_conexao <- function(){
-  conexao <- dbConnect(MySQL(),user="0130841",password="zforzachariah",dbname="farmacocinetica", host="ceted.feevale.br", port=3306)
+  conexao <- dbConnect(MySQL(),user="0051085",password="1234",dbname="pksoft", host="ceted.feevale.br", port=3306)
   return(conexao)
 }
 
