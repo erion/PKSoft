@@ -1,5 +1,35 @@
 # server.R
 
+source("./Functions/ALFA.R")
+source("./Functions/ASC.R")
+source("./Functions/ASC2.R")
+source("./Functions/AUIC.R")
+source("./Functions/BETA.R")
+source("./Functions/calculaAnos.R")
+source("./Functions/calculaMeses.R")
+source("./Functions/CL.R")
+source("./Functions/CL_Alt.R")
+source("./Functions/concentracao_pico_prevista.R")
+source("./Functions/concentracao_vale_prevista.R")
+source("./Functions/CPT.R")
+source("./Functions/CPT_Alt.R")
+source("./Functions/CRCL.R")
+source("./Functions/CrCl_Alt.R")
+source("./Functions/IMC.R")
+source("./Functions/intervalo_calculado.R")
+source("./Functions/K0.R")
+source("./Functions/K10.R")
+source("./Functions/PA.R")
+source("./Functions/PCI.R")
+source("./Functions/PCM.R")
+source("./Functions/PD.R")
+source("./Functions/sobreposicao.R")
+source("./Functions/T.R")
+source("./Functions/T12.R")
+source("./Functions/VC.R")
+source("./Functions/VDB.R")
+source("./Functions/VDB_Alt.R")
+
 #* @filter cors
 cors <- function(res) {
   res$setHeader("Access-Control-Allow-Origin", "*")
@@ -158,6 +188,21 @@ get_farmacos <- function(){
   return(tabela_farmacos())
 }
 
+#* @get /previsaoParametros
+get_previsao_parametros <- function(codPaciente,concValeDes,dose,intervaloInformado,tempoInfusao){
+  dfPaciente <- dados_paciente(codPaciente)
+  return(df2json(previsao_parametros(dfPaciente[3],dfPaciente[4],dfPaciente[5],dfPaciente[11],dfPaciente[6],concValeDes,dose,intervaloInformado,tempoInfusao)))
+}
+
+#* @get /simulacaoInicial
+get_simulacao_inicial <- function(codPaciente,concValeDes,dose,intervaloInformado,tempoInfusao,pacienteQtd){
+  dfPaciente <- dados_paciente(codPaciente)
+  dfParametros <- previsao_parametros(dfPaciente[3],dfPaciente[4],dfPaciente[5],dfPaciente[11],dfPaciente[6],concValeDes,dose,intervaloInformado,tempoInfusao)
+  dfSim <- simulacao(dose,tempoInfusao,dfParametros[15],dfParametros[13],pacienteQtd)
+  
+  return(df2json(dfSim))
+}
+
 abre_conexao <- function(){
   conexao <- dbConnect(MySQL(),user="0051085",password="1234",dbname="pksoft", host="ceted.feevale.br", port=3306)
   return(conexao)
@@ -215,4 +260,53 @@ dados_historico <- function(cod_paciente){
   df <- data.frame(data)
 
   return(df)
+}
+
+previsao_parametros <- function(nascimento,peso,altura,genero,cr,concValeDes,dose,intervaloInformado,tempoInfusao){
+  pacienteIdade <- calculaAnos(nascimento)
+  pacientePeso <- peso
+  pacienteAltura <- altura
+  pacienteGenero <- genero
+  pacienteCr <- cr
+  
+  pacienteIMC <- IMC(pacientePeso,pacienteAltura)
+  pacientePCI <- PCI(calculaAnos(nascimento),pacienteAltura,pacienteGenero)
+  pacientePCM <- PCM(pacienteGenero,pacientePeso,pacienteIMC)
+  pacientePD <- PD(pacientePCI,pacienteGenero)
+  pacientePA <- PA(pacientePeso,pacientePCI,pacientePCM)
+  pacienteASC <- ASC(pacientePeso,pacienteAltura)
+  pacienteCrCl <- CrCl_Alt(pacientePeso,pacientePCI,pacienteGenero,calculaAnos(nascimento),pacienteCr,pacienteASC,pacienteAltura, pacientePA)
+  pacienteCl <- CL_Alt(pacienteCrCl,pacientePeso,pacienteCr,calculaMeses(nascimento),calculaAnos(nascimento),calculaAnos(nascimento))
+  pacienteVc <- VC(pacientePeso,calculaMeses(nascimento),pacientePD,calculaAnos(nascimento),pacienteCrCl)
+  #pacienteVdb <- VDB(calculaMeses(nascimento),pacientePD,pacienteCl,pacienteVc,pacientePeso,pacienteCrCl,calculaAnos(nascimento))
+  pacienteVdb <- VDB_Alt(pacientePeso)
+  pacienteK10 <- K10(pacienteCl,pacienteVc)
+  pacienteBeta <- BETA(pacienteCl,pacienteVdb)
+  pacienteAlfa <- ALFA(pacienteK10,pacienteBeta)
+  pacienteT12 <- T12(pacienteBeta)
+  pacienteT <- T(pacienteT12)
+  pacienteIntervalo <- intervalo_calculado(concValeDes,pacienteCl)
+  pacienteASC2 <- ASC2(dose,pacienteCl)
+  pacienteAUIC <- AUIC(pacienteASC2,pacienteIntervalo)
+  pacienteK0 <- K0(concValeDes,pacienteAlfa,pacienteBeta,pacienteVc,tempoInfusao,intervaloInformado)
+  pacienteCPP <- concentracao_pico_prevista(pacienteK0,tempoInfusao,pacienteAlfa,pacienteBeta,pacienteVc,intervaloInformado)
+  #pacienteCVP <- concentracao_vale_prevista(pacienteK0,tempoInfusao,pacienteAlfa,pacienteBeta,intervaloInformado,pacienteVc,tempoInfusao)
+  pacienteCVP <- concentracao_vale_prevista(dose,tempoInfusao,pacienteAlfa,pacienteBeta,intervaloInformado,pacienteVc,tempoInfusao)
+  
+  dfPaciente <- data.frame(pacienteIdade,pacientePeso,pacienteAltura,pacienteGenero,pacienteCr,pacienteIMC,
+             pacientePCI,pacientePCM,pacientePD,pacientePA,pacienteASC,pacienteCrCl,pacienteCl,
+             pacienteVc,pacienteVdb,pacienteK10,pacienteBeta,pacienteAlfa,pacienteT12,pacienteT,
+             pacienteIntervalo,pacienteASC2,pacienteAUIC,pacienteK0,pacienteCPP,pacienteCVP)
+  
+  return(dfPaciente)
+}
+
+simulacao <- function(dose,tempoInfusao,pacienteVdb,pacienteCl,pacienteQtd){
+  eixo_y <- seq(0.1,120,0.1)
+  pos_curva <- 1
+  #parametros$simulacao_curva <- mapply(CPT,input$dose,parametros$simulacao_valor_alfa,input$tinf,parametros$eixo_y,parametros$simulacao_valor_beta,parametros$simulacao_valor_vc,parametros$simulacao_valor_vdb,input$dose, parametros$simulacao_valor_cl)
+  simulacao_curva <- mapply(CPT,dose,tempoInfusao,eixo_y,pacienteVdb,pacienteCl)
+  simulacao_curva_final <- sobreposicao(simulacao_curva,pacienteIntervalo, pacienteQtd)
+  
+  return(data.frame(simulacao_curva_final),eixo_y)
 }
