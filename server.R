@@ -31,6 +31,9 @@ source(paste(root_path,"Functions/VC.R", sep=""))
 source(paste(root_path,"Functions/VDB.R", sep=""))
 source(paste(root_path,"Functions/VDB_Alt.R", sep=""))
 
+#* @assets /home/oem/erion/pksoft-fe/build /
+list()
+
 #* @filter cors
 cors <- function(res) {
   res$setHeader("Access-Control-Allow-Origin", "*")
@@ -57,8 +60,9 @@ login <- function(usuario, res){
   #res$body <- jsonlite::toJSON(data_usuario,auto_unbox=TRUE)
   res$body <- 'asdasdasd'
 
-  res$toResponse()
-  return(res$toResponse())
+  res
+  #res$toResponse()
+  #return(res$toResponse())
 }
 
 #* @post /novo_paciente
