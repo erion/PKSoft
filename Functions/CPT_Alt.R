@@ -1,9 +1,9 @@
-CPT <- function(k0,a,tinf,t,b,Vc,vdb,dose){
+CPT_Alt <- function(k0,a,tinf,t,b,Vc,vdb,dose){
   k21 <- 0.46
-  
+
   S <- 1
   if(t < tinf){
-    CPt <- 
+    CPt <-
       (
         (
           (dose/tinf)
@@ -21,7 +21,7 @@ CPT <- function(k0,a,tinf,t,b,Vc,vdb,dose){
               (a-b)
           )
       )
-    + 
+    +
       (
         (
           (dose/tinf)

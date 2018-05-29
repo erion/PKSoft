@@ -6,9 +6,9 @@ CrCl <- function(peso,PCI,genero,idade,Cr,ASC,altura, PA){
 		  PCI <- PA
 		}
 
-		if(genero == 0){
+		if(genero == 'M'){
 			crcl <- (PCI*(140 - idade))/(72*Cr)
-		} else if(genero == 1){
+		} else if(genero == 'F'){
 			crcl <- (PCI*0.85*(140-idade))/(72*Cr)
 		}
 	} else if(idade <= 18){

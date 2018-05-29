@@ -217,8 +217,8 @@ get_previsao_parametros <- function(codPaciente,concValeDes,dose,intervaloInform
 #* @post /simulacao
 get_simulacao_inicial <- function(simulacao){
   dfPaciente <- dados_paciente(simulacao$cod_paciente)
-  dfParametros <- previsao_parametros(dfPaciente[3],dfPaciente[4],dfPaciente[5],dfPaciente[11],dfPaciente[6],simulacao$concetracao_desejada,simulacao$dose,simulacao$intervalo,simulacao$duracao_infusao)
-  dfSim <- simulacao(simulacao$dose,simulacao$duracao_infusao,dfParametros[15],dfParametros[13],simulacao$quantidade_doses)
+  dfParametros <- previsao_parametros(dfPaciente[3],dfPaciente[4],dfPaciente[5],dfPaciente[11],dfPaciente[6],simulacao$concentracao_desejada,simulacao$dose,simulacao$intervalo,simulacao$duracao_infusao)
+  dfSim <- simulacao(simulacao$dose,simulacao$duracao_infusao,dfParametros[15],dfParametros[13],simulacao$quantidade_doses,dfParametros[21])
   return(dfSim)
 }
 
@@ -291,7 +291,7 @@ previsao_parametros <- function(nascimento,peso,altura,genero,cr,concValeDes,dos
   pacienteIMC <- IMC(pacientePeso,pacienteAltura)
   pacientePCI <- PCI(calculaAnos(nascimento),pacienteAltura,pacienteGenero)
   pacientePCM <- PCM(pacienteGenero,pacientePeso,pacienteIMC)
-  pacientePD <- PD(pacientePCI,pacienteGenero)
+  pacientePD <- PD(pacientePCI,pacientePeso)
   pacientePA <- PA(pacientePeso,pacientePCI,pacientePCM)
   pacienteASC <- ASC(pacientePeso,pacienteAltura)
   pacienteCrCl <- CrCl_Alt(pacientePeso,pacientePCI,pacienteGenero,calculaAnos(nascimento),pacienteCr,pacienteASC,pacienteAltura, pacientePA)
@@ -320,14 +320,14 @@ previsao_parametros <- function(nascimento,peso,altura,genero,cr,concValeDes,dos
   return(dfPaciente)
 }
 
-simulacao <- function(dose,tempoInfusao,pacienteVdb,pacienteCl,pacienteQtd){
+simulacao <- function(dose,tempoInfusao,pacienteVdb,pacienteCl,pacienteQtd,pacienteIntervalo){
   eixo_y <- seq(0.1,120,0.1)
   pos_curva <- 1
   #parametros$simulacao_curva <- mapply(CPT,input$dose,parametros$simulacao_valor_alfa,input$tinf,parametros$eixo_y,parametros$simulacao_valor_beta,parametros$simulacao_valor_vc,parametros$simulacao_valor_vdb,input$dose, parametros$simulacao_valor_cl)
   simulacao_curva <- mapply(CPT,dose,tempoInfusao,eixo_y,pacienteVdb,pacienteCl)
   simulacao_curva_final <- sobreposicao(simulacao_curva,pacienteIntervalo, pacienteQtd)
 
-  return(data.frame(simulacao_curva_final),eixo_y)
+  return(data.frame(simulacao_curva_final,eixo_y))
 }
 
 dados_paciente <- function(cod_paciente){
