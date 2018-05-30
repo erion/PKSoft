@@ -42,10 +42,6 @@ cors <- function(res) {
 
 #* @post /login
 login <- function(usuario, res){
-
-  #res <- PlumberResponse$new()
-  print(res)
-
   conexao <- abre_conexao()
   query <- paste("SELECT * FROM usuario WHERE login ='",usuario$login,"'",
     "AND senha ='",usuario$senha,"'")
@@ -57,12 +53,9 @@ login <- function(usuario, res){
 
   res$setHeader("Content-Type", "application/json")
   res$status <- 200
-  #res$body <- jsonlite::toJSON(data_usuario,auto_unbox=TRUE)
-  res$body <- 'asdasdasd'
+  res$body <- jsonlite::toJSON(data_usuario,auto_unbox=TRUE)
 
   res
-  #res$toResponse()
-  #return(res$toResponse())
 }
 
 #* @post /novo_paciente
