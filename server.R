@@ -40,6 +40,7 @@ cors <- function(res) {
   plumber::forward()
 }
 
+#* @json
 #* @post /login
 login <- function(usuario, res){
   conexao <- abre_conexao()
@@ -270,6 +271,7 @@ dados_historico <- function(cod_paciente){
   rs = dbSendQuery(abriu_conexao,query)
   data = fetch(rs,n=50)
   df <- data.frame(data)
+  dbDisconnect(abriu_conexao)
 
   return(df)
 }
