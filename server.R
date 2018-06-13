@@ -41,11 +41,12 @@ cors <- function(res) {
 }
 
 #* @json
+#* @preempt cors
 #* @post /login
 login <- function(usuario, res){
   conexao <- abre_conexao()
   query <- paste("SELECT * FROM usuario WHERE login ='",usuario$login,"'",
-    "AND senha ='",usuario$senha,"'")
+    "AND senha ='",usuario$senha,"'", sep="")
 
   rs_usuario = dbSendQuery(conexao,query)
   data_usuario = fetch(rs_usuario,n = 1)
@@ -101,7 +102,7 @@ alterar_paciente <- function(id, paciente){
 #* @post /novo_tratamento
 novo_tratamento <- function(tratamento){
   conexao <- abre_conexao()
-  query <- paste("INSERT INTO tratamento(cod_paciente, cod_farmaco) VALUES(",tratamento$cod_paciente,",",tratamento$cod_farmaco,")")
+  query <- paste("INSERT INTO tratamento(cod_paciente, cod_farmaco) VALUES(",tratamento$cod_paciente,",",tratamento$cod_farmaco,")", sep="")
   dbSendQuery(conexao,query)
   dbDisconnect(conexao)
   return("Tratamento inserido com sucesso!")
@@ -113,7 +114,7 @@ alterar_tratamento <- function(id, tratamento){
   query <- paste("UPDATE tratamento SET ",
     "cod_paciente=",tratamento$cod_paciente,",",
     "cod_farmaco=",tratamento$cod_farmaco,
-    "WHERE cod_tratamento=",id)
+    "WHERE cod_tratamento=",id, , sep="")
   dbSendQuery(conexao,query)
   dbDisconnect(conexao)
   return("Tratamento alterado com sucesso!")
@@ -123,8 +124,8 @@ alterar_tratamento <- function(id, tratamento){
 novo_historico <- function(historico){
   conexao <- abre_conexao()
   query <- paste("INSERT INTO historico(atributo_historico, valor_historico, data_hora_historico, cod_tratamento)",
-                 "VALUES('",historico$atributo_historico,"',",historico$valor_historico,
-                 ",'",historico$data_hora_historico,"',",historico$cod_tratamento,")", sep="")
+    "VALUES('",historico$atributo_historico,"',",historico$valor_historico,
+    ",'",historico$data_hora_historico,"',",historico$cod_tratamento,")", sep="")
   dbSendQuery(conexao,query)
   dbDisconnect(conexao)
 }
@@ -135,11 +136,11 @@ alterar_historico <- function(id, historico){
   df_evento <- json2df(evento)
   conexao <- abre_conexao()
   query <- paste("UPDATE historico SET ",
-                "atributo_historico = '",historico$atributo_historico,"'",
-                ",valor_historico = ",historico$valor_historico,
-                ",data_hora_historico = '",historico$data_hora_historico,"'",
-                ",cod_tratamento = ",historico$cod_tratamento,
-                "WHERE cod_historico = ",id, sep="")
+    "atributo_historico = '",historico$atributo_historico,"'",
+    ",valor_historico = ",historico$valor_historico,
+    ",data_hora_historico = '",historico$data_hora_historico,"'",
+    ",cod_tratamento = ",historico$cod_tratamento,
+    "WHERE cod_historico = ",id, sep="")
   dbSendQuery(conexao,query)
   dbDisconnect(conexao)
 }
@@ -148,7 +149,7 @@ alterar_historico <- function(id, historico){
 #* @post /novo_farmaco
 novo_farmaco <- function(farmaco, res){
   conexao <- abre_conexao()
-  query <- paste("INSERT INTO farmaco(nome_farmaco) VALUES('",farmaco$nome_farmaco,"')")
+  query <- paste("INSERT INTO farmaco(nome_farmaco) VALUES('",farmaco$nome_farmaco,"')", sep="")
   dbSendQuery(conexao,query)
 
   res$status <- 200
@@ -162,7 +163,7 @@ novo_farmaco <- function(farmaco, res){
 #* @post /alterar_farmaco/<id>
 alterar_farmaco <- function(id, farmaco, res){
   conexao <- abre_conexao()
-  query <- paste("UPDATE farmaco SET nome_farmaco= '",farmaco$nome_farmaco,"' WHERE cod_farmaco= '",id,"'")
+  query <- paste("UPDATE farmaco SET nome_farmaco= '",farmaco$nome_farmaco,"' WHERE cod_farmaco= '",id,"'", sep="")
   dbSendQuery(conexao,query)
   dbDisconnect(conexao)
 
@@ -209,11 +210,13 @@ get_previsao_parametros <- function(codPaciente,concValeDes,dose,intervaloInform
 
 #* @json
 #* @post /simulacao
-get_simulacao_inicial <- function(simulacao){
+get_simulacao_inicial <- function(simulacao, res){
   dfPaciente <- dados_paciente(simulacao$cod_paciente)
   dfParametros <- previsao_parametros(dfPaciente[3],dfPaciente[4],dfPaciente[5],dfPaciente[11],dfPaciente[6],simulacao$concentracao_desejada,simulacao$dose,simulacao$intervalo,simulacao$duracao_infusao)
+
   dfSim <- simulacao(simulacao$dose,simulacao$duracao_infusao,dfParametros[15],dfParametros[13],simulacao$quantidade_doses,dfParametros[21])
-  return(dfSim)
+  res$body <- jsonlite::toJSON(dfSim)
+  res
 }
 
 abre_conexao <- function(){
@@ -253,7 +256,7 @@ tabela_tratamentos <- function(){
 
 pesquisa_tratamentos <- function(cod_paciente){
   abriu_conexao <- abre_conexao()
-  query = paste("SELECT p.nome_paciente, f.nome_farmaco, t.cod_tratamento, t.cod_farmaco, t.cod_paciente FROM paciente p INNER JOIN tratamento t ON t.cod_paciente = p.cod_paciente INNER JOIN farmaco f ON f.cod_farmaco = t.cod_farmaco WHERE p.cod_paciente = ",cod_paciente)
+  query = paste("SELECT p.nome_paciente, f.nome_farmaco, t.cod_tratamento, t.cod_farmaco, t.cod_paciente FROM paciente p INNER JOIN tratamento t ON t.cod_paciente = p.cod_paciente INNER JOIN farmaco f ON f.cod_farmaco = t.cod_farmaco WHERE p.cod_paciente = ",cod_paciente, sep="")
   rs_tratamento = dbSendQuery(abriu_conexao,query)
   data_tratamento = fetch(rs_tratamento,n=50)
   df_tratamento = data.frame(data_tratamento)
@@ -263,16 +266,15 @@ pesquisa_tratamentos <- function(cod_paciente){
 
 dados_historico <- function(cod_paciente){
   query <- paste("select h.*, f.nome_farmaco FROM historico h, tratamento t, paciente p, farmaco f",
-    "WHERE h.cod_tratamento = t.cod_tratamento",
-    "AND t.cod_paciente = p.cod_paciente",
-    "AND t.cod_farmaco = f.cod_farmaco",
-    "AND p.cod_paciente = ", cod_paciente)
+    " WHERE h.cod_tratamento = t.cod_tratamento",
+    " AND t.cod_paciente = p.cod_paciente",
+    " AND t.cod_farmaco = f.cod_farmaco",
+    " AND p.cod_paciente = ", cod_paciente, sep="")
   abriu_conexao <- abre_conexao()
   rs = dbSendQuery(abriu_conexao,query)
   data = fetch(rs,n=50)
   df <- data.frame(data)
   dbDisconnect(abriu_conexao)
-
   return(df)
 }
 
@@ -308,9 +310,9 @@ previsao_parametros <- function(nascimento,peso,altura,genero,cr,concValeDes,dos
   pacienteCVP <- concentracao_vale_prevista(dose,tempoInfusao,pacienteAlfa,pacienteBeta,intervaloInformado,pacienteVc,tempoInfusao)
 
   dfPaciente <- data.frame(pacienteIdade,pacientePeso,pacienteAltura,pacienteGenero,pacienteCr,pacienteIMC,
-             pacientePCI,pacientePCM,pacientePD,pacientePA,pacienteASC,pacienteCrCl,pacienteCl,
-             pacienteVc,pacienteVdb,pacienteK10,pacienteBeta,pacienteAlfa,pacienteT12,pacienteT,
-             pacienteIntervalo,pacienteASC2,pacienteAUIC,pacienteK0,pacienteCPP,pacienteCVP)
+                           pacientePCI,pacientePCM,pacientePD,pacientePA,pacienteASC,pacienteCrCl,pacienteCl,
+                           pacienteVc,pacienteVdb,pacienteK10,pacienteBeta,pacienteAlfa,pacienteT12,pacienteT,
+                           pacienteIntervalo,pacienteASC2,pacienteAUIC,pacienteK0,pacienteCPP,pacienteCVP)
 
   return(dfPaciente)
 }
@@ -327,7 +329,7 @@ simulacao <- function(dose,tempoInfusao,pacienteVdb,pacienteCl,pacienteQtd,pacie
 
 dados_paciente <- function(cod_paciente){
   abriu_conexao <- abre_conexao()
-  query <- paste("select nome_paciente, cpf_paciente, nascimento_paciente, peso_paciente, altura_paciente, cr_paciente, unid_int_paciente, observacao_paciente, rg_paciente, telefone_paciente, genero_paciente, agente_saude from paciente where cod_paciente = ",cod_paciente)
+  query <- paste("select nome_paciente, cpf_paciente, nascimento_paciente, peso_paciente, altura_paciente, cr_paciente, unid_int_paciente, observacao_paciente, rg_paciente, telefone_paciente, genero_paciente, agente_saude from paciente where cod_paciente = ",cod_paciente, sep="")
   rs <- dbSendQuery(abriu_conexao,query)
   data <- fetch(rs, n=1)
   df <- data.frame(data)
