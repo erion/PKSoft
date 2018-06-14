@@ -46,7 +46,7 @@ cors <- function(res) {
 login <- function(usuario, res){
   conexao <- abre_conexao()
   query <- paste("SELECT * FROM usuario WHERE login ='",usuario$login,"'",
-    "AND senha ='",usuario$senha,"'", sep="")
+                 "AND senha ='",usuario$senha,"'", sep="")
 
   rs_usuario = dbSendQuery(conexao,query)
   data_usuario = fetch(rs_usuario,n = 1)
@@ -62,14 +62,27 @@ login <- function(usuario, res){
 
 #* @post /novo_paciente
 novo_paciente <- function(paciente){
+  if(paciente$cpf_paciente == '')
+    paciente$cpf_paciente <- 'NULL'
+  if(paciente$unid_int_paciente == '')
+    paciente$unid_int_paciente <- 'NULL'
+  if(paciente$observacao_paciente == '')
+    paciente$observacao_paciente <- 'NULL'
+  if(paciente$rg_paciente == '')
+    paciente$rg_paciente <- 'NULL'
+  if(paciente$telefone_paciente == '')
+    paciente$telefone_paciente <- 'NULL'
+  if(paciente$agente_saude == '')
+    paciente$agente_saude <- 'NULL'
+
   conexao <- abre_conexao()
   query <- paste("INSERT INTO paciente(nome_paciente,cpf_paciente,nascimento_paciente,genero_paciente,",
-    "peso_paciente,altura_paciente,cr_paciente,unid_int_paciente,observacao_paciente,",
-    "rg_paciente,telefone_paciente,agente_saude) VALUES('",
-    paciente$nome_paciente,"',",paciente$cpf_paciente,",'",paciente$nascimento_paciente,
-    "','",paciente$genero_paciente,"',",paciente$peso_paciente,",",paciente$altura_paciente,
-    ",",paciente$cr_paciente,",'",paciente$unid_int_paciente,"','",paciente$observacao_paciente,
-    "',",paciente$rg_paciente,",",paciente$telefone_paciente,",'",paciente$agente_saude,"')", sep="")
+                 "peso_paciente,altura_paciente,cr_paciente,unid_int_paciente,observacao_paciente,",
+                 "rg_paciente,telefone_paciente,agente_saude) VALUES('",
+                 paciente$nome_paciente,"',",paciente$cpf_paciente,",'",paciente$nascimento_paciente,
+                 "','",paciente$genero_paciente,"',",paciente$peso_paciente,",",paciente$altura_paciente,
+                 ",",paciente$cr_paciente,",'",paciente$unid_int_paciente,"','",paciente$observacao_paciente,
+                 "',",paciente$rg_paciente,",",paciente$telefone_paciente,",'",paciente$agente_saude,"')", sep="")
 
   dbSendQuery(conexao,query)
   dbDisconnect(conexao)
@@ -80,19 +93,19 @@ novo_paciente <- function(paciente){
 alterar_paciente <- function(id, paciente){
   conexao <- abre_conexao()
   query <- paste("UPDATE paciente SET ",
-    "nome_paciente='",paciente$nome_paciente,"',",
-    "cpf_paciente='",paciente$cpf_paciente,"',",
-    "nascimento_paciente='",paciente$nascimento_paciente,"',",
-    "genero_paciente='",paciente$genero_paciente,"',",
-    "peso_paciente=",paciente$peso_paciente,",",
-    "altura_paciente=",paciente$altura_paciente,",",
-    "cr_paciente=",paciente$cr_paciente,",",
-    "unid_int_paciente='",paciente$unid_int_paciente,"',",
-    "observacao_paciente='",paciente$observacao_paciente,"',",
-    "rg_paciente='",paciente$rg_paciente,"',",
-    "telefone_paciente='",paciente$telefone_paciente,"',",
-    "agente_saude= '",paciente$agente_saude,"'",
-    "WHERE cod_paciente=",id, sep="")
+                 "nome_paciente='",paciente$nome_paciente,"',",
+                 "cpf_paciente='",paciente$cpf_paciente,"',",
+                 "nascimento_paciente='",paciente$nascimento_paciente,"',",
+                 "genero_paciente='",paciente$genero_paciente,"',",
+                 "peso_paciente=",paciente$peso_paciente,",",
+                 "altura_paciente=",paciente$altura_paciente,",",
+                 "cr_paciente=",paciente$cr_paciente,",",
+                 "unid_int_paciente='",paciente$unid_int_paciente,"',",
+                 "observacao_paciente='",paciente$observacao_paciente,"',",
+                 "rg_paciente='",paciente$rg_paciente,"',",
+                 "telefone_paciente='",paciente$telefone_paciente,"',",
+                 "agente_saude= '",paciente$agente_saude,"'",
+                 "WHERE cod_paciente=",id, sep="")
 
   dbSendQuery(conexao,query)
   dbDisconnect(conexao)
@@ -112,9 +125,9 @@ novo_tratamento <- function(tratamento){
 alterar_tratamento <- function(id, tratamento){
   conexao <- abre_conexao()
   query <- paste("UPDATE tratamento SET ",
-    "cod_paciente=",tratamento$cod_paciente,",",
-    "cod_farmaco=",tratamento$cod_farmaco,
-    "WHERE cod_tratamento=",id, , sep="")
+                 "cod_paciente=",tratamento$cod_paciente,",",
+                 "cod_farmaco=",tratamento$cod_farmaco,
+                 "WHERE cod_tratamento=",id, , sep="")
   dbSendQuery(conexao,query)
   dbDisconnect(conexao)
   return("Tratamento alterado com sucesso!")
@@ -124,8 +137,8 @@ alterar_tratamento <- function(id, tratamento){
 novo_historico <- function(historico){
   conexao <- abre_conexao()
   query <- paste("INSERT INTO historico(atributo_historico, valor_historico, data_hora_historico, cod_tratamento)",
-    "VALUES('",historico$atributo_historico,"',",historico$valor_historico,
-    ",'",historico$data_hora_historico,"',",historico$cod_tratamento,")", sep="")
+                 "VALUES('",historico$atributo_historico,"',",historico$valor_historico,
+                 ",'",historico$data_hora_historico,"',",historico$cod_tratamento,")", sep="")
   dbSendQuery(conexao,query)
   dbDisconnect(conexao)
 }
@@ -136,11 +149,11 @@ alterar_historico <- function(id, historico){
   df_evento <- json2df(evento)
   conexao <- abre_conexao()
   query <- paste("UPDATE historico SET ",
-    "atributo_historico = '",historico$atributo_historico,"'",
-    ",valor_historico = ",historico$valor_historico,
-    ",data_hora_historico = '",historico$data_hora_historico,"'",
-    ",cod_tratamento = ",historico$cod_tratamento,
-    "WHERE cod_historico = ",id, sep="")
+                 "atributo_historico = '",historico$atributo_historico,"'",
+                 ",valor_historico = ",historico$valor_historico,
+                 ",data_hora_historico = '",historico$data_hora_historico,"'",
+                 ",cod_tratamento = ",historico$cod_tratamento,
+                 "WHERE cod_historico = ",id, sep="")
   dbSendQuery(conexao,query)
   dbDisconnect(conexao)
 }
@@ -211,6 +224,13 @@ get_previsao_parametros <- function(codPaciente,concValeDes,dose,intervaloInform
 #* @json
 #* @post /simulacao
 get_simulacao_inicial <- function(simulacao, res){
+  simulacao$cod_paciente <- as.numeric(simulacao$cod_paciente)
+  simulacao$concentracao_desejada <- as.numeric(simulacao$concentracao_desejada)
+  simulacao$dose <- as.numeric(simulacao$dose)
+  simulacao$duracao_infusao <- as.numeric(simulacao$duracao_infusao)
+  simulacao$intervalo <- as.numeric(simulacao$intervalo)
+  simulacao$quantidade_doses <- as.numeric(simulacao$quantidade_doses)
+
   dfPaciente <- dados_paciente(simulacao$cod_paciente)
   dfParametros <- previsao_parametros(dfPaciente[3],dfPaciente[4],dfPaciente[5],dfPaciente[11],dfPaciente[6],simulacao$concentracao_desejada,simulacao$dose,simulacao$intervalo,simulacao$duracao_infusao)
 
@@ -266,10 +286,10 @@ pesquisa_tratamentos <- function(cod_paciente){
 
 dados_historico <- function(cod_paciente){
   query <- paste("select h.*, f.nome_farmaco FROM historico h, tratamento t, paciente p, farmaco f",
-    " WHERE h.cod_tratamento = t.cod_tratamento",
-    " AND t.cod_paciente = p.cod_paciente",
-    " AND t.cod_farmaco = f.cod_farmaco",
-    " AND p.cod_paciente = ", cod_paciente, sep="")
+                 " WHERE h.cod_tratamento = t.cod_tratamento",
+                 " AND t.cod_paciente = p.cod_paciente",
+                 " AND t.cod_farmaco = f.cod_farmaco",
+                 " AND p.cod_paciente = ", cod_paciente, sep="")
   abriu_conexao <- abre_conexao()
   rs = dbSendQuery(abriu_conexao,query)
   data = fetch(rs,n=50)
@@ -329,7 +349,7 @@ simulacao <- function(dose,tempoInfusao,pacienteVdb,pacienteCl,pacienteQtd,pacie
 
 dados_paciente <- function(cod_paciente){
   abriu_conexao <- abre_conexao()
-  query <- paste("select nome_paciente, cpf_paciente, nascimento_paciente, peso_paciente, altura_paciente, cr_paciente, unid_int_paciente, observacao_paciente, rg_paciente, telefone_paciente, genero_paciente, agente_saude from paciente where cod_paciente = ",cod_paciente, sep="")
+  query <- paste("select * from paciente where cod_paciente = ",cod_paciente, sep="")
   rs <- dbSendQuery(abriu_conexao,query)
   data <- fetch(rs, n=1)
   df <- data.frame(data)
