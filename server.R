@@ -349,7 +349,7 @@ simulacao <- function(dose,tempoInfusao,pacienteVdb,pacienteCl,pacienteQtd,pacie
 
 dados_paciente <- function(cod_paciente){
   abriu_conexao <- abre_conexao()
-  query <- paste("select * from paciente where cod_paciente = ",cod_paciente, sep="")
+  query <- paste("select nome_paciente, cpf_paciente, nascimento_paciente, peso_paciente, altura_paciente, cr_paciente, unid_int_paciente, observacao_paciente, rg_paciente, telefone_paciente, genero_paciente, agente_saude from paciente where cod_paciente = ",cod_paciente, sep="")
   rs <- dbSendQuery(abriu_conexao,query)
   data <- fetch(rs, n=1)
   df <- data.frame(data)
